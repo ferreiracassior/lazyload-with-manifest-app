@@ -1,0 +1,18 @@
+<gridster [options]="options">
+  @for (item of dashboard; track item.id) {
+    <gridster-item [item]="item">
+      <article #widgetHost class="card" [attr.data-widget-id]="item.id">
+        <div class="card__head">{{ item.title }}</div>
+        <div class="card__body">
+          @if (isLoaded(item.id) && getSafeUrl(item.id); as safeUrl) {
+            <iframe [src]="safeUrl" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" [title]="item.title"></iframe>
+          } @else {
+            <div class="skeleton">loading {{ item.id }}...</div>
+          }
+        </div>
+      </article>
+    </gridster-item>
+  }
+</gridster>
+
+<div #loadMoreSentinel style="height: 1px;"></div>
