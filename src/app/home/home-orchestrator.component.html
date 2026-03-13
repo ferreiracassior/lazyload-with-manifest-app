@@ -4,49 +4,9 @@
     <div class="page-section__content">
 
     @if (section.kind === 'flat') {
-      <gridster [options]="section.options">
-        @for (item of section.items; track item.id) {
-          <gridster-item [item]="item">
-            <article #widgetHost class="card" [attr.data-widget-id]="item.id">
-              <div class="card__head">
-                <span class="card__title">{{ item.title }}</span>
-                <button type="button" class="card__delete" (click)="removeItem(item.id)" title="Remover">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6l-1 14H6L5 6"/>
-                    <path d="M10 11v6"/>
-                    <path d="M14 11v6"/>
-                    <path d="M9 6V4h6v2"/>
-                  </svg>
-                </button>
-              </div>
-              <div class="card__body">
-                @if (isLoaded(item.id) && getSafeUrl(item.id); as safeUrl) {
-                  <iframe [src]="safeUrl" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" [title]="item.title"></iframe>
-                } @else {
-                  <div class="skeleton">loading {{ item.id }}...</div>
-                }
-              </div>
-            </article>
-          </gridster-item>
-        }
-      </gridster>
-    } @else {
-      <div class="tabs-row">
-        @for (tab of section.tabs; track tab.tabName; let tabIndex = $index) {
-          <button
-            type="button"
-            class="tab-item"
-            [class.tab-item--active]="section.activeTab === tabIndex"
-            (click)="setActiveTab(section.sectionName, tabIndex)">
-            {{ tab.tabName }}
-          </button>
-        }
-      </div>
-
-      @if (getActiveTab(section); as activeTab) {
+      @if (section.visible) {
         <gridster [options]="section.options">
-          @for (item of activeTab.items; track item.id) {
+          @for (item of section.items; track item.id) {
             <gridster-item [item]="item">
               <article #widgetHost class="card" [attr.data-widget-id]="item.id">
                 <div class="card__head">
@@ -72,6 +32,50 @@
             </gridster-item>
           }
         </gridster>
+      }
+    } @else {
+      <div class="tabs-row">
+        @for (tab of section.tabs; track tab.tabName; let tabIndex = $index) {
+          <button
+            type="button"
+            class="tab-item"
+            [class.tab-item--active]="section.activeTab === tabIndex"
+            (click)="setActiveTab(section.sectionName, tabIndex)">
+            {{ tab.tabName }}
+          </button>
+        }
+      </div>
+
+      @if (getActiveTab(section); as activeTab) {
+        @if (section.visible) {
+          <gridster [options]="section.options">
+            @for (item of activeTab.items; track item.id) {
+              <gridster-item [item]="item">
+                <article #widgetHost class="card" [attr.data-widget-id]="item.id">
+                  <div class="card__head">
+                    <span class="card__title">{{ item.title }}</span>
+                    <button type="button" class="card__delete" (click)="removeItem(item.id)" title="Remover">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14H6L5 6"/>
+                        <path d="M10 11v6"/>
+                        <path d="M14 11v6"/>
+                        <path d="M9 6V4h6v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="card__body">
+                    @if (isLoaded(item.id) && getSafeUrl(item.id); as safeUrl) {
+                      <iframe [src]="safeUrl" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" [title]="item.title"></iframe>
+                    } @else {
+                      <div class="skeleton">loading {{ item.id }}...</div>
+                    }
+                  </div>
+                </article>
+              </gridster-item>
+            }
+          </gridster>
+        }
       }
     }
     </div>

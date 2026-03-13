@@ -38,8 +38,8 @@ interface GridsterApiLike {
 }
 
 type SectionView =
-  | { sectionName: string; kind: 'flat'; items: MfeItem[]; options: GridsterConfig; gridApi?: GridsterApiLike }
-  | { sectionName: string; kind: 'grouped'; tabs: TabView[]; activeTab: number; options: GridsterConfig; gridApi?: GridsterApiLike };
+  | { sectionName: string; kind: 'flat'; items: MfeItem[]; options: GridsterConfig; gridApi?: GridsterApiLike; visible: boolean }
+  | { sectionName: string; kind: 'grouped'; tabs: TabView[]; activeTab: number; options: GridsterConfig; gridApi?: GridsterApiLike; visible: boolean };
 
 
 @Component({
@@ -80,9 +80,12 @@ export class HomeOrchestratorComponent implements AfterViewInit, OnDestroy {
     else { layout = 'desktop'; }
 
     if (layout === this.currentLayout) return;
+    const isFirstDetection = this.currentLayout === null;
     this.currentLayout = layout;
     alert(`Current layout: ${layout}`);
-    this.applyLayoutByViewport(layout);
+    if (!isFirstDetection) {
+      this.applyLayoutByViewport(layout);
+    }
   }
 
   setActiveTab(sectionName: string, tabIndex: number): void {
@@ -267,6 +270,7 @@ export class HomeOrchestratorComponent implements AfterViewInit, OnDestroy {
           activeTab: 0,
           options: sectionOptions,
           gridApi: undefined,
+          visible: true,
         };
       }
 
@@ -276,6 +280,7 @@ export class HomeOrchestratorComponent implements AfterViewInit, OnDestroy {
         items: this.mapContainersToItems(section.sectionLayout.elements, sectionIndex, null),
         options: sectionOptions,
         gridApi: undefined,
+        visible: true,
       };
     });
   }
@@ -332,60 +337,48 @@ export class HomeOrchestratorComponent implements AfterViewInit, OnDestroy {
   private applyLayoutByViewport(layout: 'mobile' | 'tablet' | 'desktop'): void {
     const useTabletLayout = layout === 'tablet';
 
+    // 1) Hide/destroy current Gridster instances and rebuild section data
     this.sections = this.sections.map((section, sectionIndex) => {
       const sourceSection = pageLayout[sectionIndex];
-      if (!sourceSection) return section;
+      if (!sourceSection) return { ...section, visible: false, gridApi: undefined };
       const elementsLayout = this.resolveElementsLayout(sourceSection, useTabletLayout);
-
-      const compactType = CompactType.None;
-      section.options.compactType = compactType;
-      section.options.maxCols = elementsLayout.sectionCols ?? 12;
-      section.options.maxRows = elementsLayout.sectionRows ?? 100;
+      const nextOptions: GridsterConfig = {
+        ...section.options,
+        compactType: CompactType.None,
+        minCols: elementsLayout.sectionCols ?? 12,
+        maxCols: elementsLayout.sectionCols ?? 12,
+        maxRows: elementsLayout.sectionRows ?? 100,
+      };
 
       if (section.kind === 'flat') {
         const sourceContainers = this.resolveFlatContainers(sourceSection, useTabletLayout);
-        const sourceItems = this.mapContainersToItems(sourceContainers, sectionIndex, null);
-        const sourceById = new Map(sourceItems.map((item) => [item.id, item]));
-
-        section.items = section.items.map((item) => {
-          const sourceItem = sourceById.get(item.id);
-          if (!sourceItem) return item;
-          return {
-            ...item,
-            cols: sourceItem.cols,
-            rows: sourceItem.rows,
-          };
-        });
-
-        return section;
+        return {
+          ...section,
+          options: nextOptions,
+          items: this.mapContainersToItems(sourceContainers, sectionIndex, null),
+          gridApi: undefined,
+          visible: false,
+        };
       }
 
       const sourceTabs = this.resolveGroupedContainers(sourceSection, useTabletLayout);
-      section.tabs = section.tabs.map((tab, tabIndex) => {
-        const sourceTab = sourceTabs[tabIndex];
-        if (!sourceTab) return tab;
-
-        const sourceItems = this.mapContainersToItems(sourceTab.containers, sectionIndex, tabIndex);
-        const sourceById = new Map(sourceItems.map((item) => [item.id, item]));
-
-        return {
-          ...tab,
-          items: tab.items.map((item) => {
-            const sourceItem = sourceById.get(item.id);
-            if (!sourceItem) return item;
-            return {
-              ...item,
-              cols: sourceItem.cols,
-              rows: sourceItem.rows,
-            };
-          }),
-        };
-      });
-
-      return section;
+      return {
+        ...section,
+        options: nextOptions,
+        tabs: sourceTabs.map((sourceTab, tabIndex) => ({
+          tabName: sourceTab.tabName,
+          items: this.mapContainersToItems(sourceTab.containers, sectionIndex, tabIndex),
+        })),
+        gridApi: undefined,
+        visible: false,
+      };
     });
 
-    this.refreshGridOptions();
+    // 2) Recreate Gridster instances in next macrotask
+    setTimeout(() => {
+      this.sections = this.sections.map((section) => ({ ...section, visible: true }));
+      queueMicrotask(() => this.observeHosts());
+    });
   }
 
   private resolveElementsLayout(section: PageSectionLayout, useTabletLayout: boolean): PageElementsLayout {
