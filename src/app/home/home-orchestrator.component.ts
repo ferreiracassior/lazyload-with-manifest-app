@@ -19,6 +19,7 @@ import {
   GridsterItemConfig,
   GridType,
 } from 'angular-gridster2';
+import { GroupedContainers, Mfe, PageContainer, PageSectionLayout, pageLayout } from './paramters';
 
 interface MfeItem extends GridsterItemConfig {
   id: string;
@@ -26,138 +27,136 @@ interface MfeItem extends GridsterItemConfig {
   remoteEntry: string;
 }
 
-const MFE_REMOTES: Array<{ id: string; title: string; remoteEntry: string }> = [
-  { id: 'mfe-01', title: 'YouTube 01', remoteEntry: 'https://www.youtube.com/embed/2ePf9rue1Ao' },
-  { id: 'mfe-02', title: 'YouTube 02', remoteEntry: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
-  { id: 'mfe-03', title: 'YouTube 03', remoteEntry: 'https://www.youtube.com/embed/M7lc1UVf-VE' },
-  { id: 'mfe-04', title: 'YouTube 04', remoteEntry: 'https://www.youtube.com/embed/aqz-KE-bpKQ' },
-  { id: 'mfe-05', title: 'YouTube 05', remoteEntry: 'https://www.youtube.com/embed/3fumBcKC6RE' },
-  { id: 'mfe-06', title: 'YouTube 06', remoteEntry: 'https://www.youtube.com/embed/ysz5S6PUM-U' },
-  { id: 'mfe-07', title: 'YouTube 07', remoteEntry: 'https://www.youtube.com/embed/ScMzIvxBSi4' },
-  { id: 'mfe-08', title: 'YouTube 08', remoteEntry: 'https://www.youtube.com/embed/Zi_XLOBDo_Y' },
-  { id: 'mfe-09', title: 'YouTube 09', remoteEntry: 'https://www.youtube.com/embed/J---aiyznGQ' },
-  { id: 'mfe-10', title: 'YouTube 10', remoteEntry: 'https://www.youtube.com/embed/9bZkp7q19f0' },
+interface TabView {
+  tabName: string;
+  items: MfeItem[];
+}
 
-  { id: 'mfe-11', title: 'Vimeo 01', remoteEntry: 'https://player.vimeo.com/video/76979871' },
-  { id: 'mfe-12', title: 'Vimeo 02', remoteEntry: 'https://player.vimeo.com/video/22439234' },
-  { id: 'mfe-13', title: 'Vimeo 03', remoteEntry: 'https://player.vimeo.com/video/146022717' },
-  { id: 'mfe-14', title: 'Vimeo 04', remoteEntry: 'https://player.vimeo.com/video/1084537' },
-  { id: 'mfe-15', title: 'Vimeo 05', remoteEntry: 'https://player.vimeo.com/video/395212534' },
-  { id: 'mfe-16', title: 'Vimeo 06', remoteEntry: 'https://player.vimeo.com/video/357274789' },
-  { id: 'mfe-17', title: 'Vimeo 07', remoteEntry: 'https://player.vimeo.com/video/90509568' },
-  { id: 'mfe-18', title: 'Vimeo 08', remoteEntry: 'https://player.vimeo.com/video/32756507' },
-  { id: 'mfe-19', title: 'Vimeo 09', remoteEntry: 'https://player.vimeo.com/video/148751763' },
-  { id: 'mfe-20', title: 'Vimeo 10', remoteEntry: 'https://player.vimeo.com/video/28066272' },
+interface GridsterApiLike {
+  resize: () => void;
+  calculateLayout: () => void;
+}
 
-  { id: 'mfe-21', title: 'Spotify 01', remoteEntry: 'https://open.spotify.com/embed/track/4uLU6hMCjMI75M1A2tKUQC' },
-  { id: 'mfe-22', title: 'Spotify 02', remoteEntry: 'https://open.spotify.com/embed/track/7qiZfU4dY1lWllzX7mPBI3' },
-  { id: 'mfe-23', title: 'Spotify 03', remoteEntry: 'https://open.spotify.com/embed/track/0VjIjW4GlUZAMYd2vXMi3b' },
-  { id: 'mfe-24', title: 'Spotify 04', remoteEntry: 'https://open.spotify.com/embed/track/1AhDOtG9vPSOmsWgNW0BEY' },
-  { id: 'mfe-25', title: 'Spotify 05', remoteEntry: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M' },
-  { id: 'mfe-26', title: 'Spotify 06', remoteEntry: 'https://open.spotify.com/embed/episode/7makk4oTQel546B0PZlDM5' },
+type SectionView =
+  | { sectionName: string; kind: 'flat'; items: MfeItem[]; options: GridsterConfig; gridApi?: GridsterApiLike }
+  | { sectionName: string; kind: 'grouped'; tabs: TabView[]; activeTab: number; options: GridsterConfig; gridApi?: GridsterApiLike };
 
-  { id: 'mfe-27', title: 'OSM 01', remoteEntry: 'https://www.openstreetmap.org/export/embed.html?bbox=-46.72%2C-23.65%2C-46.57%2C-23.52&layer=mapnik' },
-  { id: 'mfe-28', title: 'OSM 02', remoteEntry: 'https://www.openstreetmap.org/export/embed.html?bbox=-74.10%2C40.67%2C-73.87%2C40.84&layer=mapnik' },
-  { id: 'mfe-29', title: 'OSM 03', remoteEntry: 'https://www.openstreetmap.org/export/embed.html?bbox=-0.20%2C51.47%2C0.03%2C51.57&layer=mapnik' },
-  { id: 'mfe-30', title: 'OSM 04', remoteEntry: 'https://www.openstreetmap.org/export/embed.html?bbox=139.67%2C35.62%2C139.82%2C35.73&layer=mapnik' },
-  { id: 'mfe-31', title: 'OSM 05', remoteEntry: 'https://www.openstreetmap.org/export/embed.html?bbox=-43.31%2C-23.05%2C-43.14%2C-22.86&layer=mapnik' },
-  { id: 'mfe-32', title: 'OSM 06', remoteEntry: 'https://www.openstreetmap.org/export/embed.html?bbox=2.25%2C48.82%2C2.42%2C48.90&layer=mapnik' },
-
-  { id: 'mfe-33', title: 'Dailymotion 01', remoteEntry: 'https://www.dailymotion.com/embed/video/x84sh87' },
-  { id: 'mfe-34', title: 'Dailymotion 02', remoteEntry: 'https://www.dailymotion.com/embed/video/x7vo4f4' },
-
-  { id: 'mfe-35', title: 'Giphy 01', remoteEntry: 'https://giphy.com/embed/ICOgUNjpvO0PC' },
-  { id: 'mfe-36', title: 'Giphy 02', remoteEntry: 'https://giphy.com/embed/3oEjI6SIIHBdRxXI40' },
-
-  { id: 'mfe-37', title: 'YouTube 11', remoteEntry: 'https://www.youtube.com/embed/t4H_Zoh7G5A' },
-  { id: 'mfe-38', title: 'YouTube 12', remoteEntry: 'https://www.youtube.com/embed/ktvTqknDobU' },
-  { id: 'mfe-39', title: 'YouTube 13', remoteEntry: 'https://www.youtube.com/embed/L_jWHffIx5E' },
-  { id: 'mfe-40', title: 'YouTube 14', remoteEntry: 'https://www.youtube.com/embed/eVTXPUF4Oz4' },
-];
 
 @Component({
   selector: 'app-home-orchestrator',
   standalone: true,
   imports: [CommonModule, Gridster, GridsterItem],
   templateUrl: './home-orchestrator.component.html',
-  styles: [`
-    // filepath: /home/cassio/git/lazyload-with-manifest-app/src/app/home/home-orchestrator.component.ts
-    :host {
-      display: block;
-      padding: 16px;
-      overflow-x: hidden;
-      box-sizing: border-box;
-      width: 100%;
-    }
-    gridster {
-      min-height: 100vh;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .card {
-      width: 100%;
-      height: 100%;
-      border-radius: 8px;
-      border: 1px solid #2a3447;
-      background: #111827;
-      color: #e5e7eb;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .card__head {
-      padding: 6px 8px;
-      font-size: 12px;
-      border-bottom: 1px solid #2a3447;
-      cursor: grab;
-      user-select: none;
-    }
-    .card__body { flex: 1; min-height: 0; }
-    iframe { width: 100%; height: 100%; border: 0; }
-    .skeleton { width: 100%; height: 100%; display: grid; place-items: center; opacity: .7; }
-  `],
+  styleUrl: './home-orchestrator.component.scss',
 })
 export class HomeOrchestratorComponent implements AfterViewInit, OnDestroy {
   @ViewChildren('widgetHost', { read: ElementRef }) widgetHosts!: QueryList<ElementRef<HTMLElement>>;
   private sanitizer = inject(DomSanitizer);
+  private hostRef = inject(ElementRef<HTMLElement>);
   private observer?: IntersectionObserver;
+  private resizeObserver?: ResizeObserver;
+  private currentLayout: 'desktop' | 'tablet' | 'mobile' | null = null;
 
-  options: GridsterConfig = {
-    gridType: GridType.ScrollVertical,
-    compactType: CompactType.CompactUpAndLeft,
-    displayGrid: DisplayGrid.None,
-    margin: 10,
-    minCols: 1,
-    maxCols: 12,
-    minRows: 1,
-    maxRows: 100,
-    pushItems: true,
-    swap: false,
-    draggable: { enabled: true, ignoreContent: true, dragHandleClass: 'card__head' },
-    resizable: { enabled: true },
-  };
-
-  dashboard: MfeItem[] = MFE_REMOTES.map((mfe, i) => ({
-    id: mfe.id,
-    title: mfe.title,
-    remoteEntry: mfe.remoteEntry,
-    cols: (i % 3 === 0 ? 4 : 3),
-    rows: (i % 4 === 0 ? 2 : 3),
-    x: (i * 3) % 12,
-    y: Math.floor(i / 4) * 2,
-  }));
+  sections: SectionView[] = this.buildSections(pageLayout);
 
   loaded = signal<Record<string, boolean>>({});
   safeUrls = signal<Record<string, SafeResourceUrl>>({});
 
   ngAfterViewInit(): void {
     this.createObserver();
+    this.createResizeObserver();
     this.widgetHosts.changes.subscribe(() => this.observeHosts());
     queueMicrotask(() => this.observeHosts());
+    queueMicrotask(() => this.syncSectionWidths(this.getGridWidth()));
+    this.validateLayout(this.getGridWidth());
+  }
+
+  validateLayout(width: number): void {
+
+    let layout: 'mobile' | 'tablet' | 'desktop';
+
+    if (width < 600) { layout = 'mobile'; }
+    else if (width < 1200) { layout = 'tablet'; }
+    else { layout = 'desktop'; }
+
+    if (layout === this.currentLayout) return;
+    this.currentLayout = layout;
+    alert(`Current layout: ${layout}`);
+  }
+
+  setActiveTab(sectionName: string, tabIndex: number): void {
+    const section = this.sections.find((current) => current.sectionName === sectionName);
+    if (!section || section.kind !== 'grouped') return;
+    (section as Extract<SectionView, { kind: 'grouped' }>).activeTab = tabIndex;
+    queueMicrotask(() => this.observeHosts());
+  }
+
+  getActiveTab(section: SectionView): TabView | null {
+    if (section.kind !== 'grouped') return null;
+    return section.tabs[section.activeTab] ?? null;
+  }
+
+  removeItem(itemId: string): void {
+    console.log('[grid-debug] removeItem:start', { itemId });
+    let removed: MfeItem | null = null;
+
+    for (const section of this.sections) {
+      if (section.kind === 'flat') {
+        const found = section.items.find((item) => item.id === itemId) ?? null;
+        if (!found) continue;
+
+        console.log('[grid-debug] removeItem:found-flat', {
+          section: section.sectionName,
+          item: found,
+        });
+        removed = found;
+        const nextItems = section.items.filter((item) => item.id !== itemId);
+        section.items = this.expandNeighborIntoGap(nextItems, found);
+        continue;
+      }
+
+      section.tabs = section.tabs.map((tab) => {
+        const found = tab.items.find((item) => item.id === itemId) ?? null;
+        if (!found) return tab;
+
+        console.log('[grid-debug] removeItem:found-tab', {
+          section: section.sectionName,
+          tab: tab.tabName,
+          item: found,
+        });
+        removed = found;
+        const nextItems = tab.items.filter((item) => item.id !== itemId);
+        return { ...tab, items: this.expandNeighborIntoGap(nextItems, found) };
+      });
+    }
+
+    if (removed) {
+      console.log('[grid-debug] removeItem:removed', { itemId, removed });
+      this.loaded.update((state) => {
+        const next = { ...state };
+        delete next[itemId];
+        return next;
+      });
+
+      this.safeUrls.update((state) => {
+        const next = { ...state };
+        delete next[itemId];
+        return next;
+      });
+    }
+
+    if (!removed) {
+      console.log('[grid-debug] removeItem:not-found', { itemId });
+    }
+
+    this.refreshGridOptions();
+
+    console.log('[grid-debug] removeItem:end', { itemId });
   }
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+    this.resizeObserver?.disconnect();
   }
 
   isLoaded(id: string): boolean {
@@ -166,6 +165,11 @@ export class HomeOrchestratorComponent implements AfterViewInit, OnDestroy {
 
   getSafeUrl(id: string): SafeResourceUrl | null {
     return this.safeUrls()[id] ?? null;
+  }
+
+  private getGridWidth(): number {
+    const gridElement = this.hostRef.nativeElement.querySelector('gridster') as HTMLElement | null;
+    return gridElement?.clientWidth ?? this.hostRef.nativeElement.clientWidth;
   }
 
   private createObserver(): void {
@@ -180,6 +184,22 @@ export class HomeOrchestratorComponent implements AfterViewInit, OnDestroy {
     }, { rootMargin: '250px 0px', threshold: 0.01 });
   }
 
+  private createResizeObserver(): void {
+    this.resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      this.syncSectionWidths(entry.contentRect.width);
+    });
+
+    this.resizeObserver.observe(this.hostRef.nativeElement);
+  }
+
+  private syncSectionWidths(containerWidth: number): void {
+    if (!containerWidth || containerWidth <= 0) return;
+
+    this.refreshGridOptions();
+  }
+
   private observeHosts(): void {
     for (const ref of this.widgetHosts.toArray()) {
       const el = ref.nativeElement;
@@ -191,7 +211,7 @@ export class HomeOrchestratorComponent implements AfterViewInit, OnDestroy {
 
   private loadWidget(id: string): void {
     if (this.isLoaded(id)) return;
-    const item = this.dashboard.find((d) => d.id === id);
+    const item = this.getAllItems().find((dashboardItem) => dashboardItem.id === id);
     if (!item) return;
 
     this.loaded.update(s => ({ ...s, [id]: true }));
@@ -215,5 +235,394 @@ export class HomeOrchestratorComponent implements AfterViewInit, OnDestroy {
     } catch {
       return remoteEntry;
     }
+  }
+
+  private getAllItems(): MfeItem[] {
+    const items: MfeItem[] = [];
+    for (const section of this.sections) {
+      if (section.kind === 'flat') {
+        items.push(...section.items);
+        continue;
+      }
+      for (const tab of section.tabs) {
+        items.push(...tab.items);
+      }
+    }
+    return items;
+  }
+
+  private buildSections(layouts: PageSectionLayout[]): SectionView[] {
+    return layouts.map((section, sectionIndex) => {
+      const sectionOptions = this.createSectionOptions(section);
+
+      if (this.isGroupedSection(section.sectionLayout)) {
+        return {
+          sectionName: section.sectionName,
+          kind: 'grouped',
+          tabs: section.sectionLayout.map((group, tabIndex) => ({
+            tabName: group.tabName,
+            items: this.mapContainersToItems(group.containers, sectionIndex, tabIndex),
+          })),
+          activeTab: 0,
+          options: sectionOptions,
+          gridApi: undefined,
+        };
+      }
+
+      return {
+        sectionName: section.sectionName,
+        kind: 'flat',
+        items: this.mapContainersToItems(section.sectionLayout, sectionIndex, null),
+        options: sectionOptions,
+        gridApi: undefined,
+      };
+    });
+  }
+
+  private createSectionOptions(section: PageSectionLayout): GridsterConfig {
+    const maxCols = section.sectionCols ?? 12;
+    const maxRows = section.sectionRows ?? 100;
+
+    return {
+      gridType: GridType.ScrollVertical,
+      setGridSize: true,
+      compactType: CompactType.None,
+      displayGrid: DisplayGrid.None,
+      margin: 10,
+      minCols: 1,
+      maxCols,
+      minRows: 1,
+      maxRows,
+      pushItems: true,
+      swap: false,
+      draggable: { enabled: true, ignoreContent: true, dragHandleClass: 'card__head' },
+      resizable: { enabled: true },
+      disableWindowResize: false,
+      disableScrollHorizontal: false,
+      disableScrollVertical: true,
+      swapWhileDragging: false,
+      initCallback: (_, gridsterApi) => {
+        const currentSection = this.sections.find((current) => current.sectionName === section.sectionName);
+        if (!currentSection) return;
+        currentSection.gridApi = {
+          resize: gridsterApi.resize,
+          calculateLayout: gridsterApi.calculateLayout,
+        };
+      },
+      itemResizeCallback: () => this.validateLayout(this.getGridWidth()),
+    };
+  }
+
+  private refreshGridOptions(): void {
+    console.log('[grid-debug] refreshGridOptions:start', { sections: this.sections.length });
+    for (const section of this.sections) {
+      console.log('[grid-debug] refreshGridOptions:section', {
+        section: section.sectionName,
+        hasApi: !!section.gridApi,
+      });
+      section.gridApi?.resize();
+      section.gridApi?.calculateLayout();
+    }
+    console.log('[grid-debug] refreshGridOptions:end');
+  }
+
+  private expandNeighborIntoGap(items: MfeItem[], removed: MfeItem): MfeItem[] {
+    const gapX = removed.x;
+    const gapY = removed.y;
+    const gapCols = removed.cols;
+    const gapRows = removed.rows;
+
+    console.log('[grid-debug] gap:start', {
+      removedId: removed.id,
+      gapX,
+      gapY,
+      gapCols,
+      gapRows,
+      candidateCount: items.length,
+    });
+
+    if (gapX == null || gapY == null || gapCols == null || gapRows == null) {
+      console.log('[grid-debug] gap:invalid-removed-rect', { removed });
+      return items;
+    }
+
+    const left = items.find((item) =>
+      item.x != null && item.y != null && item.cols != null && item.rows != null
+      && item.y === gapY
+      && item.rows === gapRows
+      && item.x + item.cols === gapX
+    );
+
+    console.log('[grid-debug] gap:candidate-left', { candidateId: left?.id ?? null });
+
+    if (left && this.canResizeItem(left, { x: left.x!, y: left.y!, cols: left.cols! + gapCols, rows: left.rows! }, items)) {
+      console.log('[grid-debug] gap:apply-left', {
+        id: left.id,
+        from: { x: left.x, y: left.y, cols: left.cols, rows: left.rows },
+        to: { x: left.x, y: left.y, cols: left.cols! + gapCols, rows: left.rows },
+      });
+      return items.map((item) => item.id === left.id ? { ...item, cols: item.cols! + gapCols } : item);
+    }
+
+    const leftGroup = items.filter((item) =>
+      item.x != null && item.y != null && item.cols != null && item.rows != null
+      && item.x + item.cols === gapX
+      && item.y >= gapY
+      && item.y + item.rows <= gapY + gapRows,
+    );
+
+    if (
+      leftGroup.length > 1
+      && this.coversRange(leftGroup, gapY, gapRows, 'vertical')
+      && leftGroup.every((item) => this.canResizeItem(item, {
+        x: item.x!,
+        y: item.y!,
+        cols: item.cols! + gapCols,
+        rows: item.rows!,
+      }, items))
+    ) {
+      console.log('[grid-debug] gap:apply-left-group', {
+        ids: leftGroup.map((item) => item.id),
+      });
+
+      const leftIds = new Set(leftGroup.map((item) => item.id));
+      return items.map((item) => leftIds.has(item.id) ? { ...item, cols: item.cols! + gapCols } : item);
+    }
+
+    const right = items.find((item) =>
+      item.x != null && item.y != null && item.cols != null && item.rows != null
+      && item.y === gapY
+      && item.rows === gapRows
+      && item.x === gapX + gapCols
+    );
+
+    console.log('[grid-debug] gap:candidate-right', { candidateId: right?.id ?? null });
+
+    if (right && this.canResizeItem(right, { x: gapX, y: right.y!, cols: right.cols! + gapCols, rows: right.rows! }, items)) {
+      console.log('[grid-debug] gap:apply-right', {
+        id: right.id,
+        from: { x: right.x, y: right.y, cols: right.cols, rows: right.rows },
+        to: { x: gapX, y: right.y, cols: right.cols! + gapCols, rows: right.rows },
+      });
+      return items.map((item) => item.id === right.id ? { ...item, x: gapX, cols: item.cols! + gapCols } : item);
+    }
+
+    const rightGroup = items.filter((item) =>
+      item.x != null && item.y != null && item.cols != null && item.rows != null
+      && item.x === gapX + gapCols
+      && item.y >= gapY
+      && item.y + item.rows <= gapY + gapRows,
+    );
+
+    if (
+      rightGroup.length > 1
+      && this.coversRange(rightGroup, gapY, gapRows, 'vertical')
+      && rightGroup.every((item) => this.canResizeItem(item, {
+        x: gapX,
+        y: item.y!,
+        cols: item.cols! + gapCols,
+        rows: item.rows!,
+      }, items))
+    ) {
+      console.log('[grid-debug] gap:apply-right-group', {
+        ids: rightGroup.map((item) => item.id),
+      });
+
+      const rightIds = new Set(rightGroup.map((item) => item.id));
+      return items.map((item) => rightIds.has(item.id) ? { ...item, x: gapX, cols: item.cols! + gapCols } : item);
+    }
+
+    const top = items.find((item) =>
+      item.x != null && item.y != null && item.cols != null && item.rows != null
+      && item.x === gapX
+      && item.cols === gapCols
+      && item.y + item.rows === gapY
+    );
+
+    console.log('[grid-debug] gap:candidate-top', { candidateId: top?.id ?? null });
+
+    if (top && this.canResizeItem(top, { x: top.x!, y: top.y!, cols: top.cols!, rows: top.rows! + gapRows }, items)) {
+      console.log('[grid-debug] gap:apply-top', {
+        id: top.id,
+        from: { x: top.x, y: top.y, cols: top.cols, rows: top.rows },
+        to: { x: top.x, y: top.y, cols: top.cols, rows: top.rows! + gapRows },
+      });
+      return items.map((item) => item.id === top.id ? { ...item, rows: item.rows! + gapRows } : item);
+    }
+
+    const topGroup = items.filter((item) =>
+      item.x != null && item.y != null && item.cols != null && item.rows != null
+      && item.y + item.rows === gapY
+      && item.x >= gapX
+      && item.x + item.cols <= gapX + gapCols,
+    );
+
+    if (
+      topGroup.length > 1
+      && this.coversRange(topGroup, gapX, gapCols, 'horizontal')
+      && topGroup.every((item) => this.canResizeItem(item, {
+        x: item.x!,
+        y: item.y!,
+        cols: item.cols!,
+        rows: item.rows! + gapRows,
+      }, items))
+    ) {
+      console.log('[grid-debug] gap:apply-top-group', {
+        ids: topGroup.map((item) => item.id),
+      });
+
+      const topIds = new Set(topGroup.map((item) => item.id));
+      return items.map((item) => topIds.has(item.id) ? { ...item, rows: item.rows! + gapRows } : item);
+    }
+
+    const bottom = items.find((item) =>
+      item.x != null && item.y != null && item.cols != null && item.rows != null
+      && item.x === gapX
+      && item.cols === gapCols
+      && item.y === gapY + gapRows
+    );
+
+    console.log('[grid-debug] gap:candidate-bottom', { candidateId: bottom?.id ?? null });
+
+    if (bottom && this.canResizeItem(bottom, { x: bottom.x!, y: gapY, cols: bottom.cols!, rows: bottom.rows! + gapRows }, items)) {
+      console.log('[grid-debug] gap:apply-bottom', {
+        id: bottom.id,
+        from: { x: bottom.x, y: bottom.y, cols: bottom.cols, rows: bottom.rows },
+        to: { x: bottom.x, y: gapY, cols: bottom.cols, rows: bottom.rows! + gapRows },
+      });
+      return items.map((item) => item.id === bottom.id ? { ...item, y: gapY, rows: item.rows! + gapRows } : item);
+    }
+
+    const bottomGroup = items.filter((item) =>
+      item.x != null && item.y != null && item.cols != null && item.rows != null
+      && item.y === gapY + gapRows
+      && item.x >= gapX
+      && item.x + item.cols <= gapX + gapCols,
+    );
+
+    if (
+      bottomGroup.length > 1
+      && this.coversRange(bottomGroup, gapX, gapCols, 'horizontal')
+      && bottomGroup.every((item) => this.canResizeItem(item, {
+        x: item.x!,
+        y: gapY,
+        cols: item.cols!,
+        rows: item.rows! + gapRows,
+      }, items))
+    ) {
+      console.log('[grid-debug] gap:apply-bottom-group', {
+        ids: bottomGroup.map((item) => item.id),
+      });
+
+      const bottomIds = new Set(bottomGroup.map((item) => item.id));
+      return items.map((item) => bottomIds.has(item.id) ? { ...item, y: gapY, rows: item.rows! + gapRows } : item);
+    }
+
+    console.log('[grid-debug] gap:no-candidate-applied', {
+      removedId: removed.id,
+      remainingItems: items.map((item) => ({ id: item.id, x: item.x, y: item.y, cols: item.cols, rows: item.rows })),
+    });
+
+    return items;
+  }
+
+  private coversRange(
+    candidates: MfeItem[],
+    start: number,
+    length: number,
+    axis: 'horizontal' | 'vertical',
+  ): boolean {
+    const end = start + length;
+    const segments = candidates
+      .map((item) => {
+        if (axis === 'vertical') {
+          return { start: item.y!, end: item.y! + item.rows! };
+        }
+
+        return { start: item.x!, end: item.x! + item.cols! };
+      })
+      .sort((first, second) => first.start - second.start);
+
+    let cursor = start;
+    for (const segment of segments) {
+      if (segment.start > cursor) {
+        return false;
+      }
+
+      cursor = Math.max(cursor, segment.end);
+      if (cursor >= end) {
+        return true;
+      }
+    }
+
+    return cursor >= end;
+  }
+
+  private canResizeItem(
+    target: MfeItem,
+    nextRect: { x: number; y: number; cols: number; rows: number },
+    items: MfeItem[],
+  ): boolean {
+    if (nextRect.cols < 1 || nextRect.rows < 1) return false;
+
+    const nextRight = nextRect.x + nextRect.cols;
+    const nextBottom = nextRect.y + nextRect.rows;
+
+    for (const item of items) {
+      if (item.id === target.id) continue;
+      if (item.x == null || item.y == null || item.cols == null || item.rows == null) continue;
+
+      const right = item.x + item.cols;
+      const bottom = item.y + item.rows;
+      const overlap = nextRect.x < right && nextRight > item.x && nextRect.y < bottom && nextBottom > item.y;
+
+      if (overlap) {
+        console.log('[grid-debug] canResizeItem:collision', {
+          targetId: target.id,
+          nextRect,
+          blockingItem: { id: item.id, x: item.x, y: item.y, cols: item.cols, rows: item.rows },
+        });
+        return false;
+      }
+    }
+
+    console.log('[grid-debug] canResizeItem:ok', {
+      targetId: target.id,
+      nextRect,
+    });
+
+    return true;
+  }
+
+  private mapContainersToItems(containers: PageContainer[], sectionIndex: number, tabIndex: number | null): MfeItem[] {
+    return containers
+      .map((container, index) => {
+        const source = container.elementToLoad;
+        if (!this.isMfe(source)) return null;
+
+        return {
+          id: this.buildItemId(sectionIndex, tabIndex, container.id, index),
+          title: source.title,
+          remoteEntry: source.remoteEntry,
+          cols: container.cols,
+          rows: container.rows,
+          x: container.x,
+          y: container.y,
+        };
+      })
+      .filter((item): item is MfeItem => !!item);
+  }
+
+  private isGroupedSection(layout: PageContainer[] | GroupedContainers[]): layout is GroupedContainers[] {
+    return layout.length > 0 && 'tabName' in layout[0];
+  }
+
+  private isMfe(value: Mfe | { name: string } | null): value is Mfe {
+    return !!value && 'remoteEntry' in value;
+  }
+
+  private buildItemId(sectionIndex: number, tabIndex: number | null, containerId: string, itemIndex: number): string {
+    const tab = tabIndex === null ? 'flat' : `tab-${tabIndex}`;
+    return `section-${sectionIndex}-${tab}-${containerId}-${itemIndex}`;
   }
 }
